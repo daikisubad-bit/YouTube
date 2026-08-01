@@ -1,0 +1,31 @@
+# 1. リサーチ・ネタ出し
+
+感覚だけの「なんとなく良さそう」を避け、可能な限り数字の裏付けを取ってからネタを絞り込む。
+
+## 集める情報
+
+- **競合・類似チャンネルの動画**：再生数、チャンネル登録者数との比率、投稿時期、アウトライア倍率（そのチャンネルの平均に対して
+  何倍再生されているか）。倍率が高いほど「型として効いている」可能性が高い。
+- **トレンド・急上昇ネタ**：ジャンル内で今伸びている切り口。
+- **視聴者の声**：コメント欄に出てくる疑問・不満・要望。台本のフックや差別化ポイントの種になる。
+- **キーワード**：検索されている語句と検索ボリューム。SEOタイトルの土台。
+
+## vidIQツールの使い分け
+
+| 知りたいこと | ツール |
+|---|---|
+| 特定チャンネルの動画一覧・実績 | `vidiq_channel_videos`, `vidiq_channel_stats`, `vidiq_channel_analytics` |
+| 平均に対して跳ねている動画（アウトライア） | `vidiq_outliers`, `vidiq_breakout_channels` |
+| 似ている動画・チャンネル | `vidiq_similar_videos`, `vidiq_similar_channels` |
+| 今伸びているジャンル・トレンド | `vidiq_trending_videos`, `vidiq_trend_categories` |
+| キーワードの検索需要 | `vidiq_keyword_research` |
+| 動画への反応・視聴者の疑問 | `vidiq_video_comments`, `vidiq_video_transcript` |
+| Instagram/TikTokの outlier リサーチ（横展開ネタ） | `vidiq_instagram_tiktok_outlier_search`, `vidiq_ig_outlier_reels_search` |
+| 特定動画のYouTube検索での見え方 | `vidiq_youtube_search`, `vidiq_video_watch` |
+
+## 進め方
+
+1. `00_my_knowhow.md` の「1. リサーチ」に情報源の指定があればそれに従う。なければ上記ツールで競合チャンネルを横断的に見る。
+2. 見つけたネタ候補は、**再生数だけでなく倍率（そのチャンネルの中でどれだけ跳ねているか）**を必ず併記する。単発の絶対的な
+   再生数の大小だけで判断しない。
+3. ネタ候補を3〜5個に絞り、それぞれ「なぜ跳ねたと考えられるか」の仮説を1行添えて次の企画ステップに渡す。
