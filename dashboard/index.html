@@ -269,12 +269,152 @@
     color: var(--text-faint);
   }
 
+  .add-btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    width: 20px;
+    height: 20px;
+    line-height: 1;
+    border-radius: 3px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    transition: border-color 0.12s ease, color 0.12s ease;
+  }
+
+  .add-btn:hover,
+  .add-btn:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .add-btn[aria-expanded="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
   .column-body {
     padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 8px;
     flex: 1;
+  }
+
+  /* ---------- Add-project form ---------- */
+
+  .add-form {
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    padding: 9px;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .add-form label {
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .add-form input,
+  .add-form textarea {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12.5px;
+    padding: 6px 7px;
+    resize: vertical;
+  }
+
+  .add-form textarea {
+    min-height: 44px;
+  }
+
+  .add-form input:focus,
+  .add-form textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .add-form .field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .add-form .actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .add-form button {
+    appearance: none;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 6px 10px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-dim);
+  }
+
+  .add-form button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+    flex: 1;
+  }
+
+  .add-form button.primary:hover {
+    background: var(--accent-strong);
+    border-color: var(--accent-strong);
+  }
+
+  .add-form .hint {
+    font-size: 10.5px;
+    color: var(--text-faint);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .add-form .copied {
+    font-size: 10.5px;
+    color: var(--ok);
+    display: none;
+  }
+
+  .add-form .copied.show {
+    display: block;
+  }
+
+  .add-form .fallback {
+    width: 100%;
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono",
+      Menlo, Consolas, monospace;
+    font-size: 11px;
+    min-height: 70px;
+    display: none;
+  }
+
+  .add-form .fallback.show {
+    display: block;
   }
 
   /* ---------- Cards ---------- */
@@ -466,9 +606,10 @@
       onboard.className = "onboard";
       onboard.innerHTML =
         "<h2>まだ動画プロジェクトはありません</h2>" +
-        "<p>Claude Codeでこのリポジトリのyoutube-video-productionスキルを使って動画の相談を始めると、" +
-        "<code>projects/</code> に進行ファイルが作られ、このボードにカードが追加されます。</p>" +
-        "<p>まずは今考えている動画テーマを1つ、チャットで伝えるところから。</p>";
+        "<p>各列の見出しにある「＋」ボタンでタイトルを入力し、コピーしたテキストをClaude Codeのチャットに貼り付けると、" +
+        "<code>projects/</code> に進行ファイルが作られてこのボードにカードが追加されます（このボードはClaudeが" +
+        "会話のたびに再publishするスナップショットなので、その場では反映されません）。</p>" +
+        "<p>もちろん「＋」を使わず、テーマを直接チャットで話しかけてもOKです。</p>";
       board.appendChild(onboard);
     }
 
@@ -489,7 +630,12 @@
         "</span>" +
         '<span class="count mono">' +
         items.length +
-        "</span>";
+        "</span>" +
+        '<button type="button" class="add-btn" data-stage-idx="' +
+        stage.idx +
+        '" data-stage-name="' +
+        stage.name +
+        '" aria-expanded="false" title="この工程で新しい動画を追加">+</button>';
       col.appendChild(head);
 
       var body = document.createElement("div");
@@ -530,6 +676,105 @@
 
       col.appendChild(body);
       board.appendChild(col);
+    });
+
+    function slugify(title) {
+      var base = title
+        .trim()
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, "-")
+        .replace(/^-+|-+$/g, "");
+      return base || "video";
+    }
+
+    function buildMessage(stageIdx, stageName, title, memo) {
+      var lines = [
+        "新しい動画プロジェクトを追加してください。",
+        "タイトル: " + title,
+        "現在の工程: " + stageIdx + ". " + stageName,
+        "スラッグ案: " + slugify(title),
+      ];
+      if (memo) lines.push("メモ: " + memo);
+      return lines.join("\n");
+    }
+
+    function closeOpenForms() {
+      board.querySelectorAll(".add-form").forEach(function (f) {
+        f.remove();
+      });
+      board.querySelectorAll('.add-btn[aria-expanded="true"]').forEach(
+        function (b) {
+          b.setAttribute("aria-expanded", "false");
+        }
+      );
+    }
+
+    board.addEventListener("click", function (e) {
+      var btn = e.target.closest(".add-btn");
+      if (!btn) return;
+
+      var wasOpen = btn.getAttribute("aria-expanded") === "true";
+      closeOpenForms();
+      if (wasOpen) return;
+
+      btn.setAttribute("aria-expanded", "true");
+      var stageIdx = btn.getAttribute("data-stage-idx");
+      var stageName = btn.getAttribute("data-stage-name");
+      var body = btn.closest(".column").querySelector(".column-body");
+
+      var form = document.createElement("div");
+      form.className = "add-form";
+      form.innerHTML =
+        '<p class="hint">タイトルを入力して「チャットに貼るテキストをコピー」を押し、' +
+        "このボードはClaudeがチャットでの会話をもとに更新する方式なので、コピーした内容をこのプロジェクトの" +
+        "Claude Codeセッションに貼り付けて送ってください。</p>" +
+        '<div class="field"><label>動画タイトル</label>' +
+        '<input type="text" class="add-title" placeholder="例：〇〇の始め方" /></div>' +
+        '<div class="field"><label>メモ（任意）</label>' +
+        '<textarea class="add-memo" placeholder="切り口・参考動画など"></textarea></div>' +
+        '<div class="actions">' +
+        '<button type="button" class="primary add-copy">チャットに貼るテキストをコピー</button>' +
+        '<button type="button" class="add-cancel">キャンセル</button>' +
+        "</div>" +
+        '<p class="copied">コピーしました。Claude Codeのチャットに貼り付けてください。</p>' +
+        '<textarea class="fallback" readonly></textarea>';
+
+      body.insertBefore(form, body.firstChild);
+      form.querySelector(".add-title").focus();
+
+      form.querySelector(".add-cancel").addEventListener("click", function () {
+        closeOpenForms();
+      });
+
+      form.querySelector(".add-copy").addEventListener("click", function () {
+        var title = form.querySelector(".add-title").value.trim();
+        if (!title) {
+          form.querySelector(".add-title").focus();
+          return;
+        }
+        var memo = form.querySelector(".add-memo").value.trim();
+        var message = buildMessage(stageIdx, stageName, title, memo);
+        var copiedEl = form.querySelector(".copied");
+        var fallbackEl = form.querySelector(".fallback");
+
+        function showCopied() {
+          copiedEl.classList.add("show");
+          fallbackEl.classList.remove("show");
+        }
+
+        function showFallback() {
+          fallbackEl.value = message;
+          fallbackEl.classList.add("show");
+          fallbackEl.focus();
+          fallbackEl.select();
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(message).then(showCopied, showFallback);
+        } else {
+          showFallback();
+        }
+      });
     });
 
     var counts = document.getElementById("counts");
